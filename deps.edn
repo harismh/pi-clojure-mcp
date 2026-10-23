@@ -1,0 +1,8 @@
+{:paths ["clojure/src"]
+ :deps {org.clojure/clojure {:mvn/version "1.12.6"}
+        io.github.bhauman/clojure-mcp
+        {:git/url "https://github.com/bhauman/clojure-mcp.git"
+         :git/tag "v0.6.0"
+         :git/sha "2b0213f079ab59e3b204c539ead12b63db54e223"}}
+ :aliases {:test {:extra-paths ["clojure/test"]
+                  :main-opts ["-m" "pi-clojure.test-runner"]}}}

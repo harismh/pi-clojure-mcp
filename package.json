@@ -1,0 +1,37 @@
+{
+  "name": "pi-clojure-mcp",
+  "version": "0.1.0",
+  "description": "Thin pi integration for ClojureMCP with explicit runtime health and ownership",
+  "type": "module",
+  "license": "MIT",
+  "author": { "name": "harismh", "url": "https://github.com/harismh" },
+  "repository": { "type": "git", "url": "git+https://github.com/harismh/pi-clojure-mcp.git" },
+  "homepage": "https://github.com/harismh/pi-clojure-mcp#readme",
+  "bugs": { "url": "https://github.com/harismh/pi-clojure-mcp/issues" },
+  "publishConfig": { "access": "public", "registry": "https://registry.npmjs.org/" },
+  "keywords": ["pi-package", "clojure", "repl", "mcp", "nrepl"],
+  "packageManager": "bun@1.4.2",
+  "engines": {
+    "node": ">=22.19"
+  },
+  "files": ["src", "clojure/src", "skills", "deps.edn", "README.md", "CHANGELOG.md", "docs", "AGENTS.md", "LICENSE", "NOTICE"],
+  "pi": {
+    "extensions": ["./src/extension.ts"],
+    "skills": ["./skills"]
+  },
+  "scripts": {
+    "check": "bun --bun tsc --noEmit",
+    "test": "bun test ./test",
+    "test:clojure": "clojure -Srepro -M:test",
+    "pack:check": "bun pm pack --dry-run --ignore-scripts"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "typebox": "*"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.4",
+    "@types/node": "^22.19.0",
+    "typescript": "^5.9.3"
+  }
+}

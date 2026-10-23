@@ -1,0 +1,10 @@
+node_modules/
+.cpcache/
+.clj-kondo/.cache/
+.clj-kondo/imports/
+.lsp/.cache/
+.nrepl-port
+.pi/
+.DS_Store
+*.log
+*.tgz

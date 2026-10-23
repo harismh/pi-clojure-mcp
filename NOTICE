@@ -1,0 +1,9 @@
+pi-clojure-mcp is an integration, not a fork of ClojureMCP.
+
+ClojureMCP by Bruce Hauman is used as a pinned external dependency:
+https://github.com/bhauman/clojure-mcp
+v0.6.0, commit 2b0213f079ab59e3b204c539ead12b63db54e223
+It remains licensed under the Eclipse Public License 2.0.
+
+Clojure, nREPL, and transitive dependencies retain their respective licenses.
+No upstream dependency source or jar is bundled in the distributed package.
