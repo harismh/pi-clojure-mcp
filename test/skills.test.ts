@@ -26,9 +26,11 @@ test("bundled skill validates and advertises metadata without injecting its actu
   assert.ok(!advertised.includes(firstParagraph));
 });
 
-test("skill retains first-use tool orientation and the revised verification section", async () => {
+test("skill retains runtime orientation, target choices and contract-directed verification", async () => {
   const source = await readFile(skillPath, "utf8");
-  assert.match(source, /^## First use: establish the operating context$/m);
+  assert.match(source, /^## Orient to the runtime$/m);
+  assert.match(source, /^### Choose a target$/m);
+  assert.match(source, /`confirm_state_loss: true`/);
   assert.match(source, /`mcp__pi_clojure__`/);
   const tools = [...source.matchAll(/^\| `([a-z_]+)` \|/gm)].map(match => match[1]).sort();
   assert.deepEqual(tools, ["clojure_eval", "clojure_repl", "list_nrepl_ports", "paren_repair", "runtime_status"]);

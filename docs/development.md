@@ -57,4 +57,4 @@ Update the Git coordinates in `deps.edn` and the reported revision in `runtime.c
 
 Do not silently add fallback startup, a second process owner, an alternative transport, arbitrary project reload policy or thread-stop claims. Upstream schemas are authoritative for upstream tools. Add a dedicated regression before extending lifecycle or isolation guarantees.
 
-See [architecture](architecture.md), [reference](reference.md), and the [release procedure](releasing.md).
+See [architecture](architecture.md) and [reference](reference.md).

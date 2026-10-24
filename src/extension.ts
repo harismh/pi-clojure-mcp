@@ -13,7 +13,7 @@ Use the agent's MCP tools:
 Ask: "Check the Clojure runtime, then attach to port 7888" or "Start a fresh managed REPL".
 For Clojure coding/debugging, consult the repl-driven-development skill.
 Use /skill:repl-driven-development to load its full guidance explicitly.
-There is no implicit JVM startup. External JVMs are never stopped by this package.
+Application JVM startup is explicit. Stopping an external target detaches without terminating its process.
 Managed JVMs end with MCP: Pi reload/exit, session replacement, or MCP reconnect; no replay.
 The footer is LAST CHECKED information. Call runtime_status for a fresh health check.
 Conversation branching does not rewind application state; this is not a sandbox.`;

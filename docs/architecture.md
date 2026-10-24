@@ -12,6 +12,8 @@ Pi / built-in MCP
 
 ## What is reused
 
+`pi-clojure-mcp` is a thin integration around upstream ClojureMCP, not a fork or a replacement nREPL client.
+
 Pi supplies MCP stdio transport, server/tool registration, permissions, exposure and cleanup. ClojureMCP supplies the nREPL client/session machinery, evaluation/discovery helper initialization, tool definitions, output formatting, port discovery, delimiter repair and process launcher/shutdown hook. This package contains neither a new bencode implementation nor a replacement MCP/nREPL transport.
 
 `main.clj` assembles upstream’s tool factories and adds two tool maps. It deliberately bypasses the convenience startup wrapper that can automatically launch processes from project configuration. The `:repl` profile is narrow: Pi remains the editor/search/shell harness. The upstream version is pinned because these integration APIs are not assumed stable across revisions.
@@ -20,7 +22,7 @@ Pi supplies MCP stdio transport, server/tool registration, permissions, exposure
 
 ## Development guidance
 
-`skills/repl-driven-development/SKILL.md` is the canonical, on-demand development guide. It is self-contained for normal work, including first-use target orientation and verification by changed contract rather than a compulsory REPL-to-cold-process sequence. Installation/project-routing details are in [first use](first-use.md), and optional rationale/evaluation evidence in [skill design](skill-design.md). The package manifest declares the skill alongside the extension. Pi advertises its routing metadata; it does not automatically place the full guide in every request.
+The package manifest declares `skills/repl-driven-development/SKILL.md` alongside the extension. Pi advertises its routing metadata and loads the guide on demand. Installation/resource discovery is covered in [first use](first-use.md); the guide's rationale is in [skill design](skill-design.md).
 
 `guidance.clj` appends one short shared reminder to all five tool descriptions and the server instructions. Original description text and safety contracts remain intact; tool schemas, executors, annotations and result formatting are unchanged by this decoration. There is no per-call prompt rewrite, result footer, compulsory skill loader or added tool. Direct tools therefore carry the cue even when a client does not surface server instructions. Detailed advice lives only in the skill.
 
@@ -48,7 +50,7 @@ Footer state is explicitly last checked and is invalidated by eval/failure. Neit
 | --- | --- |
 | `src/config.ts` | Flags/environment, MCP registration arguments, status validation/presentation |
 | `src/extension.ts` | Pi integration only |
-| `clojure/src/pi_clojure/main.clj` | Pinned upstream server composition, no implicit launch |
+| `clojure/src/pi_clojure/main.clj` | Pinned upstream server composition, opt-in application startup |
 | `clojure/src/pi_clojure/runtime.clj` | Readiness, ownership policy and request gate |
 | `clojure/src/pi_clojure/guidance.clj` | Shared, description-only skill reminder |
 | `skills/repl-driven-development/SKILL.md` | Evidence-driven REPL development philosophy |

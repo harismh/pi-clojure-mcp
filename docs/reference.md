@@ -16,7 +16,7 @@ Flags take precedence. The command is one executable path, not a shell expressio
 
 The MCP server’s dependency resolution runs from this package’s directory using `-Srepro`. Its project is the Pi working directory passed explicitly at registration. The selected application JVM’s actual cwd is reported separately. Registration is skipped for untrusted Pi projects; trust the project before loading it.
 
-No JVM is started implicitly, including from upstream project `:start-nrepl-cmd`/fallback configuration. Other upstream ClojureMCP project configuration still applies. Trust project dependencies/configuration before executing code.
+The MCP integration server runs in its own JVM. Application REPL startup is a separate, explicit action: upstream project `:start-nrepl-cmd`/fallback configuration cannot trigger it implicitly. Other upstream ClojureMCP project configuration still applies. Trust project dependencies/configuration before executing code.
 
 This package pins ClojureMCP v0.6.0, revision `2b0213f079ab59e3b204c539ead12b63db54e223`. It does not depend on the revision installed under your global `-Tmcp` alias.
 
@@ -39,15 +39,15 @@ Returns JSON containing:
 - `activeRequests`: active/queued upstream evaluation **requests**, not a count of live application threads.
 - `changing`, `generation`, `observedAt`, `stale`: snapshot provenance. A concurrent target transition makes a snapshot explicitly stale.
 
-Health uses an independent connection and ephemeral evaluation session. It does not initialize ClojureMCP helpers or change the default evaluation session’s namespace, `*1`, `*2`, `*3`, or `*e`. It is not a heap snapshot or proof that application behavior is healthy.
+Readiness and metadata checks use an independent connection and ephemeral session, preserving the default evaluation session’s namespace, `*1`, `*2`, `*3`, and `*e` without initializing application helpers. Readiness establishes nREPL protocol support; application-level behavior needs its own checks.
 
-The Pi footer always says **last checked**. Evaluation or a failed management result invalidates that cached snapshot. No timer continuously probes your runtime.
+The Pi footer labels its cached snapshot **last checked**. Evaluation or a failed management result invalidates that snapshot. Call `runtime_status` to refresh it.
 
 ### `clojure_repl`
 
 | Action | Arguments | Effect |
 | --- | --- | --- |
-| `start` | `{"action":"start"}` | Explicitly launch one local JVM using the project’s dependencies and nREPL 1.7.0 on an ephemeral port. Refuses a live selected target or an already-owned JVM. |
+| `start` | `{"action":"start"}` | Explicitly launch one local application JVM using the project’s dependencies and nREPL 1.7.0 on an ephemeral port. Refuses a live selected target or an already-owned JVM. |
 | `attach` | `{"action":"attach","port":7888,"host":"127.0.0.1"}` | Probe and select an existing server. Host is optional. Does not own that process. |
 | `stop` | `{"action":"stop"}` | Detach from an external server; or terminate the managed JVM after acknowledgment. |
 
@@ -63,11 +63,7 @@ Human-oriented help plus last-checked status. It does not run an evaluation or l
 
 ## Development guidance
 
-The package declares the [repl-driven-development skill](../skills/repl-driven-development/SKILL.md). Pi advertises its name/description and loads its full text when selected. Use `/skill:repl-driven-development` to explicitly load it. Package-directory installation/loading discovers the skill; loading the extension file alone does not.
-
-A short shared reminder is appended to every tool description and the MCP server instructions, so direct declarations and tool/namespace discovery can find it. Server instructions alone do not reach every direct tool call. The full guide is not injected into every request/result, and skill loading is not enforced; user-disabled skills or non-Pi clients may not expose it. Runtime safety contracts remain in tool descriptions/schemas, independent of the skill.
-
-The guide includes first-use orientation, question-driven experiments, data-oriented design, project test-helper discovery, and state-aware reload decisions. Verification follows the changed contract: REPL-run tests can exercise real production code; compiler, browser/external-system, or clean-loading checks are chosen when their boundaries are affected. A fresh process is not a mandatory final step and does not inherently establish greater correctness. The guide is not an eval quota or safe-reload guarantee, and asks agents to distinguish observed design feedback from batch work or planned demonstrations. [Research and trial feedback](skill-design.md) are optional background; normal use does not depend on those links.
+The optional [repl-driven-development skill](../skills/repl-driven-development/SKILL.md) is the agent's development guide. Pi advertises it for on-demand use; `/skill:repl-driven-development` loads it explicitly. Tool descriptions and schemas retain their safety contracts whether or not the skill is loaded. See [first use](first-use.md) for resource discovery, [architecture](architecture.md#development-guidance) for delivery mechanics, and [design notes](skill-design.md) for rationale.
 
 ## State and safety boundaries
 

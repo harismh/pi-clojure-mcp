@@ -7,31 +7,36 @@ compatibility: Pi with pi-clojure-mcp loaded and access to an authorized Clojure
 
 # Evidence-driven Clojure development
 
-Let observations from the running program inform the next design decision. Do not write a whole speculative implementation and call it REPL-driven because its tests eventually ran in a REPL.
+Develop against the running application: use focused observations to guide changes, preserve useful state, save working code, and verify the affected behavior.
 
 Think about the problem first: inputs, outputs, invariants, data flow, and the important uncertainties. Prefer plain immutable data and small pure transformations, with effects at explicit boundaries. Introduce protocols, macros, or frameworks when the problem warrants them—not merely because the language supports them.
 
-Use this as a default approach, not an eval quota or fixed ceremony. Mechanical edits and documentation may need no runtime experiment. Step back for architectural decisions; fast local feedback does not establish that the overall design is right.
+Let feedback shape the next design decision rather than merely confirm a completed implementation. Scale the investigation to the task: there is no eval quota or mandatory sequence, and mechanical edits or documentation may need no runtime experiment. Step back for architectural decisions; fast local feedback alone does not establish that the overall design is right.
 
-## First use: establish the operating context
+## Orient to the runtime
 
-This skill assumes the package is loaded; it does not install or restart it. If its tools are unavailable, report that before attempting runtime work.
+Use the authorized `mcp__pi_clojure__` tools; another ClojureMCP registration may address a different application. This skill assumes the package is loaded. Report missing tools before runtime work rather than installing or restarting implicitly.
 
-In Pi, the following names belong to the `mcp__pi_clojure__` tool namespace. Do not accidentally use another ClojureMCP server with a different target.
-
-| Tool | Use |
+| Tool | Use it to |
 | --- | --- |
-| `runtime_status` | Check actual readiness, ownership, application PID/cwd, and integration project |
-| `list_nrepl_ports` | Discover candidate existing servers; discovery does not select one |
-| `clojure_repl` | Explicitly attach, start, or stop/detach |
-| `clojure_eval` | Evaluate forms and use runtime discovery helpers |
-| `paren_repair` | Repair delimiter errors in a source file; review the resulting form |
+| `runtime_status` | Confirm readiness, application PID/cwd, ownership and integration project |
+| `list_nrepl_ports` | Find candidate existing servers |
+| `clojure_repl` | Explicitly start, attach, stop or detach |
+| `clojure_eval` | Inspect live values/source and evaluate code or project tests |
+| `paren_repair` | Repair unbalanced source delimiters; review the resulting form |
 
-When establishing a target, use `mcp__pi_clojure__runtime_status`. Recheck after a target change or uncertain context, not before every form. MCP connected does not mean an application REPL is ready. If none is ready, prefer the intended existing project REPL; attach using its verified port. Make a fresh JVM startup explicit when the task calls for one. Never replace a live target merely to fix a connection or namespace problem.
+When choosing a target, use `runtime_status` to confirm **application identity (PID/cwd), readiness, ownership and state at risk**. Recheck after target changes or uncertainty, not before every form. Match project and runtime family to the task. MCP connectivity confirms integration-server availability; application readiness needs its own check. Status namespace is last evaluation-reported; query `(ns-name *ns*)` when needed.
 
-Confirm the integration project, application cwd, and intended runtime. Clojure versus ClojureScript/browser context matters. Status namespace is last evaluation-reported, not a fresh query; use `(ns-name *ns*)` when uncertain.
+### Choose a target
 
-A ready default may belong to another project. Preserve it when valuable: use a separately started project REPL through the eval tool's explicit `port` for every related call. That does not change the management default or transfer ownership; `runtime_status` still describes the default target. Switching away from a managed default may discard its state and requires the tools' acknowledgment process.
+| Goal | Action |
+| --- | --- |
+| Use the intended existing project REPL | Verify its port and identity, then `clojure_repl` → `attach` |
+| Start a fresh application REPL | Explicitly request `clojure_repl` → `start`; preserve any live target |
+| Work in another REPL while keeping the current one | Use `clojure_eval` with the verified explicit `port` on every related call |
+| Switch away from a managed target | Obtain state-loss approval before `attach`/`stop` with `confirm_state_loss: true` |
+
+Explicit-port evaluation leaves the management default and ownership unchanged; `runtime_status` and `clojure_repl stop` still concern that default. Prefer a separately started project REPL when valuable state should outlive Pi. Resolve namespace or connection problems without casually replacing the application.
 
 Inspect project instructions, dependencies, dev setup, test commands, and test helpers/fixtures early. Determine which production code their backends exercise and what they simulate. Require a source namespace before switching into it; `in-ns` alone does not load its file. Use deliberate aliases or qualified names. Do not conceal missing dependencies with unrelated REPL definitions or unrecorded classpath changes.
 
@@ -93,8 +98,8 @@ A fresh process tests a particular property—such as reproducible startup—not
 
 On failure, inspect the cause, relevant exception data, and source context; narrow the reproduction. Fix the cause rather than hiding the exception or repeatedly resetting the environment.
 
-An eval timeout or interrupt acknowledgment is not proof that computation stopped. Do not blindly retry effectful work. Check observable state and use explicit ownership/lifecycle controls when necessary.
+After an eval timeout or interrupt acknowledgment, check observable effects before retrying: computation may still be running. Use explicit ownership/lifecycle controls when necessary.
 
 Managed JVMs belong to their MCP server and can be lost on Pi/MCP reload, reconnect, session replacement, or exit. External REPLs are not owned by this package. Conversation navigation does not rewind application state. Follow the current tools' state-loss confirmation rules.
 
-Finish with a concise account of what observations changed the design, what tests actually establish, what remains unverified, and any live objects or processes intentionally retained. Distinguish a planned demonstration from a discovered defect, and batch-first work from genuinely feedback-driven development. If no usable REPL was available, say so and explain the fallback.
+Finish with a concise account of which observations shaped the change, what the checks establish, what remains unverified, and any live objects or processes intentionally retained. Describe planned demonstrations and batch-first work accurately. If no usable REPL was available, explain the fallback.

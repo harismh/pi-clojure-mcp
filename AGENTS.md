@@ -4,7 +4,7 @@ Thin integration around pinned upstream ClojureMCP for persistent Clojure develo
 
 - Start at `README.md`; contracts are in `docs/reference.md`, ownership in `docs/architecture.md`.
 - Pi owns MCP transport/registration. Upstream ClojureMCP owns evaluation/discovery and is the sole managed-JVM launcher/supervisor.
-- Preserve upstream tool schemas/results. No implicit JVM launch, hidden target replacement, or external-process termination.
+- Preserve upstream tool schemas/results. No implicit application JVM launch, hidden target replacement, or external-process termination.
 - Managed heap loss through management tools requires explicit acknowledgment. Managed state also ends with its MCP server; do not claim persistence across Pi reload/session replacement.
 - Health probes must not alter evaluation-session namespace/history/errors. Namespace displayed by status is last evaluation-reported, not freshly queried.
 - Evaluations share application state and have full filesystem/process access. Failures do not undo earlier effects; timeouts or interrupt acknowledgments do not prove execution stopped.
