@@ -1,5 +1,6 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { MANAGEMENT_TOOLS, parseOptions, readStatus, SERVER_NAME, serverConfig, statusLabel, type RuntimeStatus } from "./config.ts";
+import { feedbackRenderer } from "./renderers.ts";
 
 const HELP = `pi-clojure-mcp — thin ClojureMCP integration
 
@@ -15,10 +16,13 @@ For Clojure coding/debugging, consult the repl-driven-development skill.
 Use /skill:repl-driven-development to load its full guidance explicitly.
 Application JVM startup is explicit. Stopping an external target detaches without terminating its process.
 Managed JVMs end with MCP: Pi reload/exit, session replacement, or MCP reconnect; no replay.
+Eval/runtime cards support Pi's native expansion for received output; rendering never evaluates code.
 The footer is LAST CHECKED information. Call runtime_status for a fresh health check.
 Conversation branching does not rewind application state; this is not a sandbox.`;
 
 export default function clojureExtension(pi: ExtensionAPI) {
+  pi.registerToolRenderer(feedbackRenderer);
+
   let context: ExtensionContext | undefined;
   let registeredProject: string | undefined;
   let lastStatus: RuntimeStatus | undefined;

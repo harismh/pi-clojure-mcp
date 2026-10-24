@@ -37,6 +37,7 @@ Use the bundled [repl-driven-development skill](../skills/repl-driven-developmen
 | Docs, skill structure/routing, links | `bun test ./test/docs.test.ts ./test/skills.test.ts`; package dry run |
 | Skill advertising or MCP tool exposure | `bun test ./test/pi-integration.test.ts` exercises real Pi SDK registration and prompt advertising |
 | TypeScript/API edits | `bun run check` plus affected Bun tests |
+| Feedback UI | `bun test ./test/renderers.test.ts ./test/feedback-integration.test.ts`; real MCP integration when payload/registration is affected |
 | Clojure evaluation, readiness, ownership/lifecycle | Focused runtime tests and relevant real MCP/process integration tests; use both suites when the changed contracts span them |
 
 The repository's lifecycle tests deliberately own disposable processes because they test startup/shutdown and ownership behavior. That is the boundary under test—not a reason to restart an existing user REPL for unrelated validation.
@@ -46,6 +47,8 @@ The repository's lifecycle tests deliberately own disposable processes because t
 `bun test` includes a real in-process Pi SDK session with Pi’s built-in MCP extension. Offline assistant turns are supplied through the public session store; a test-only parent tool calls `ctx.executeTool`, exercising validation, hooks and actual MCP transport without an LLM or credentials.
 
 That test loads the package manifest, verifies clean skill discovery and on-demand prompt advertising, checks the reminder on all five real MCP tool descriptions while retaining upstream/safety text, and checks exact tool exposure, no implicit startup (even with upstream project auto-start configuration), real status, unchanged evaluation history, metadata/source discovery, scoped function reload preserving the same atom, managed loss acknowledgment, external-process survival, live-target replacement refusal, and managed shutdown. It uses separate ephemeral ports and disposable projects; it never attaches to the developer’s default port 7888.
+
+Feedback tests use Pi's public `ToolExecutionComponent` to exercise actual expansion, error flags, wrapping and theme invalidation. They check narrow widths, Unicode, terminal controls, unknown/mixed results, snapshot provenance and immutable input/result fixtures. A saved-session test reopens disposable history and exports it through `session.exportToHtml`, checking the actual pre-rendered views and original payloads. The real MCP test renders returned results in JSON mode, verifying that UI registration does not change execution or model/codemode content.
 
 Pure guidance tests verify that decoration is idempotent and preserves schemas, annotations and executor identity. Runtime tests exercise the real nREPL protocol, verify default-session history/error/namespace preservation, reject a TCP-only listener as not ready, check serialization/request-gate failures and stale snapshots, and validate external detach plus managed lifecycle/alias handling. Test-only access to nREPL’s binding store measures history without another eval changing that history. Production uses upstream/public client APIs.
 

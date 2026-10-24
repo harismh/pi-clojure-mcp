@@ -50,6 +50,10 @@ test("published documentation links, package identity and upstream pin remain co
   const lock = Bun.JSONC.parse(await readFile(resolve(PACKAGE_ROOT, "bun.lock"), "utf8")) as { workspaces: { "": { name: string } } };
   assert.equal(lock.workspaces[""].name, manifest.name);
   await assert.rejects(stat(resolve(PACKAGE_ROOT, "package-lock.json")), { code: "ENOENT" });
+  for (const host of ["@earendil-works/pi-coding-agent", "@earendil-works/pi-tui", "typebox"]) {
+    assert.equal(manifest.peerDependencies[host], "*");
+    assert.ok(!manifest.dependencies?.[host], `host-provided ${host} must not be bundled`);
+  }
   assert.deepEqual(manifest.pi.extensions, ["./src/extension.ts"]);
   assert.deepEqual(manifest.pi.skills, ["./skills"]);
   for (const required of ["src", "clojure/src", "skills", "deps.edn", "README.md", "CHANGELOG.md", "docs", "AGENTS.md", "LICENSE", "NOTICE"]) assert.ok(manifest.files.includes(required));

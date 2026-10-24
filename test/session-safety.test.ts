@@ -9,7 +9,7 @@ test("session replacement/fork confirms known managed state loss and shutdown cl
   let consent = false;
   let confirmations = 0;
   extension({
-    registerFlag() {}, registerCommand() {}, registerMcpServer() {}, getFlag() {},
+    registerFlag() {}, registerCommand() {}, registerMcpServer() {}, registerToolRenderer() {}, getFlag() {},
     on(name: string, handler: Function) { events.set(name, handler); },
   } as unknown as ExtensionAPI);
   const ctx = { cwd: "/project", hasUI: true, isProjectTrusted: () => true, ui: {

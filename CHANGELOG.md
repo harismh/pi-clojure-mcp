@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0
+
+- Native Pi feedback cards for evaluation, runtime status and REPL management, without changing tool schemas, executors or model/codemode results.
+- Syntax-highlighted requested code, recorded request timing, bounded successful-output previews and native expansion for received output.
+- Runtime-identity snapshots with explicit readiness, ownership, stale/last-checked provenance and last-reported namespace labels.
+- Failed requests retain all received error text, including errors between successful forms. Unknown result shapes stay readable; images retain Pi's normal renderer.
+- History and HTML-export rendering without reconnecting or probing application REPLs; rendering issues no extra evaluations or file reads.
+- Renderer coverage for narrow terminals, Unicode, terminal-control escaping, theme changes, payload preservation, saved sessions and real MCP results in JSON mode.
+
+Streaming stdout/stderr, live object inspection and an always-on panel are outside this release. Existing runtime ownership and state-loss rules are unchanged.
+
 ## 0.1.0
 
 Initial release.

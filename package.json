@@ -1,14 +1,25 @@
 {
   "name": "pi-clojure-mcp",
-  "version": "0.1.0",
-  "description": "Thin pi integration for ClojureMCP with explicit runtime health and ownership",
+  "version": "0.2.0",
+  "description": "Pi integration for ClojureMCP with explicit runtime ownership, agent guidance and REPL feedback cards",
   "type": "module",
   "license": "MIT",
-  "author": { "name": "harismh", "url": "https://github.com/harismh" },
-  "repository": { "type": "git", "url": "git+https://github.com/harismh/pi-clojure-mcp.git" },
+  "author": {
+    "name": "harismh",
+    "url": "https://github.com/harismh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/harismh/pi-clojure-mcp.git"
+  },
   "homepage": "https://github.com/harismh/pi-clojure-mcp#readme",
-  "bugs": { "url": "https://github.com/harismh/pi-clojure-mcp/issues" },
-  "publishConfig": { "access": "public", "registry": "https://registry.npmjs.org/" },
+  "bugs": {
+    "url": "https://github.com/harismh/pi-clojure-mcp/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "keywords": ["pi-package", "clojure", "repl", "mcp", "nrepl"],
   "packageManager": "bun@1.4.2",
   "engines": {
@@ -27,6 +38,7 @@
   },
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*",
     "typebox": "*"
   },
   "devDependencies": {

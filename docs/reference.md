@@ -61,6 +61,21 @@ The selected default target and an upstream `clojure_eval` call’s optional exp
 
 Human-oriented help plus last-checked status. It does not run an evaluation or launch a process. Ask the agent to use the MCP tools for those actions.
 
+## REPL feedback
+
+Pi's native tool renderers provide cards for `clojure_eval`, `runtime_status` and `clojure_repl` in the interactive transcript and HTML exports. They change presentation only: the five tools, execution, model-facing content and codemode results retain their original contracts. Discovery and delimiter-repair tools keep Pi's standard presentation.
+
+- **Evaluation:** requested code is highlighted as Clojure, with an explicit-port routing label or `default target`. Input and successful-output previews are bounded by display lines. Expansion reveals the complete requested code, remaining arguments and received text.
+- **Runtime snapshots:** recognized status JSON becomes a card with readiness, ownership, endpoint, application PID/cwd, integration project, last evaluation-reported namespace and last-checked time. Stale snapshots and unavailable metadata are labeled. Expansion includes the original JSON. Unrecognized or additional output stays as received text.
+- **Errors:** failed requests show all received text even while collapsed, preserving intermediate errors and subsequent values. Request completion means the tool returned, not that project tests passed or a timed-out computation stopped.
+- **Timing:** elapsed request time comes from Pi's recorded duration, including transport/queue overhead. It is omitted when unavailable, including in some exports/older sessions.
+
+Use Pi's native expansion action (Ctrl+E by default, or click where supported). Pi's existing output limits still apply; saved full-output paths remain visible and the renderer never opens those files automatically. Terminal controls are escaped in the view while original payloads stay unchanged. Exception output can therefore remain lengthy.
+
+Cards use the stored request/result, not today's target cache. `default target` is a routing description, not a claim about the current JVM. Viewing history or exporting it performs no runtime checks or extra evaluations. Direct MCP transcript calls get these cards; nested calls through codemode or another tool retain their parent's presentation.
+
+Upstream evaluation returns formatted text: these cards preserve its ordering and expression dividers rather than trying to reconstruct stdout/stderr channels. They are not a live object inspector or a source of continuous streaming output. See [architecture](architecture.md#feedback-presentation) for the implementation boundary.
+
 ## Development guidance
 
 The optional [repl-driven-development skill](../skills/repl-driven-development/SKILL.md) is the agent's development guide. Pi advertises it for on-demand use; `/skill:repl-driven-development` loads it explicitly. Tool descriptions and schemas retain their safety contracts whether or not the skill is loaded. See [first use](first-use.md) for resource discovery, [architecture](architecture.md#development-guidance) for delivery mechanics, and [design notes](skill-design.md) for rationale.

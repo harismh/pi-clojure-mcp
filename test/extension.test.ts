@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "bun:test";
-import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import type { ExtensionAPI, ToolRendererResolver } from "@earendil-works/pi-coding-agent";
 import extension from "../src/extension.ts";
 
 test("extension registers lazily, keeps upstream tools intact and never owns a second JVM", async () => {
   const events = new Map<string, Function>();
   const servers: unknown[] = [];
+  const renderers: ToolRendererResolver[] = [];
   const statuses: unknown[] = [];
   const notices: string[] = [];
   const commands = new Map<string, { handler: Function }>();
@@ -13,6 +14,7 @@ test("extension registers lazily, keeps upstream tools intact and never owns a s
     registerFlag() {}, getFlag() { return undefined; },
     on(name: string, handler: Function) { events.set(name, handler); },
     registerMcpServer(name: string, config: unknown) { servers.push({ name, config }); },
+    registerToolRenderer(renderer: ToolRendererResolver) { renderers.push(renderer); },
     registerCommand(name: string, config: { handler: Function }) { commands.set(name, config); },
     sendMessage() {},
   } as unknown as ExtensionAPI;
@@ -20,6 +22,8 @@ test("extension registers lazily, keeps upstream tools intact and never owns a s
     ui: { setStatus(_key: string, value: unknown) { statuses.push(value); }, notify(text: string) { notices.push(text); } } };
   extension(pi);
   assert.equal(servers.length, 0, "factory must not connect or start anything");
+  assert.equal(renderers.length, 1);
+  assert.ok(renderers[0]!("mcp__pi_clojure__clojure_eval", () => undefined)?.renderCall, "cards work before MCP connects");
   await events.get("session_start")!({}, context);
   assert.equal(servers.length, 1);
   await events.get("session_start")!({}, context);
@@ -37,7 +41,7 @@ test("extension registers lazily, keeps upstream tools intact and never owns a s
 test("an untrusted project cannot trigger ClojureMCP project-config loading", async () => {
   let start: Function | undefined;
   let registered = false;
-  extension({ registerFlag() {}, registerCommand() {}, getFlag() {}, on(name: string, handler: Function) { if (name === "session_start") start = handler; }, registerMcpServer() { registered = true; } } as unknown as ExtensionAPI);
+  extension({ registerFlag() {}, registerCommand() {}, registerToolRenderer() {}, getFlag() {}, on(name: string, handler: Function) { if (name === "session_start") start = handler; }, registerMcpServer() { registered = true; } } as unknown as ExtensionAPI);
   await start!({}, { cwd: "/untrusted", hasUI: false, isProjectTrusted: () => false });
   assert.equal(registered, false);
 });

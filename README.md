@@ -27,6 +27,7 @@ Uses upstream [ClojureMCP](https://github.com/bhauman/clojure-mcp) for evaluatio
 
 - **nREPL management** — attach to existing REPLs or explicitly start one, with clear readiness, ownership and lifecycle controls.
 - **Agent steering** — the `repl-driven-development` skill encourages discovery and exploration over batch-then-test workflows.
+- **REPL feedback** — highlighted forms, recorded request timing, expandable output and readable runtime-identity cards.
 
 > [!NOTE]
 > **AI disclosure:** Scope was set by me. Development was done by OpenAI’s `gpt-6.1-sol`. Upstream libraries are all credited in [NOTICE](NOTICE).
@@ -52,7 +53,7 @@ With the [prerequisites](#prerequisites) ready:
 
 1. Install a released version:
    ```sh
-   pi install npm:pi-clojure-mcp@0.1.0
+   pi install npm:pi-clojure-mcp@0.2.0
    ```
    For unpublished source, use a [local checkout](docs/development.md#local-checkout).
 2. Start Pi in your Clojure project:
@@ -103,6 +104,8 @@ You: Inspect the function handling checkout totals, reproduce the problem,
      make the smallest fix, and run its project test in the same runtime.
 ```
 
+Eval calls show requested Clojure code alongside received output; runtime calls show identity and ownership snapshots. Use Pi's native expansion (Ctrl+E by default, or click where supported) for all received text and the original status JSON. Failed requests keep their received error output visible. These [feedback cards](docs/reference.md#repl-feedback) also work in HTML exports; model-facing results stay unchanged.
+
 The [repl-driven-development skill](skills/repl-driven-development/SKILL.md) guides focused experiments, state-aware reloads and durable regression checks. Pi advertises it for on-demand use; `/skill:repl-driven-development` loads it explicitly.
 
 | Tool | Use it to |
@@ -119,7 +122,7 @@ Full tool names start with `mcp__pi_clojure__`. Evaluation, discovery and delimi
 
 **To use the package:**
 
-- Pi with native MCP support and its supported Node runtime; tested with Pi 1.3.0.
+- Pi with native MCP and tool-renderer support, plus its supported Node runtime; tested with Pi 1.3.0.
 - Clojure CLI.
 - JDK 17 or later, the pinned upstream's minimum.
 - Git and network access for initial dependency resolution.

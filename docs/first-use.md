@@ -4,18 +4,18 @@ Use this guide to install the package, choose an application REPL and resolve di
 
 ## Install the package, not just the extension
 
-Using the package requires Pi with native MCP support (tested with 1.3.0), Pi's supported Node runtime, Clojure CLI, Git, and JDK 17 or later, the upstream minimum. Initial dependency resolution needs Git/Maven network access. Bun and a TypeScript build are only development concerns; see [development](development.md) for the tested environment.
+Using the package requires Pi with native MCP and tool-renderer support (tested with 1.3.0), Pi's supported Node runtime, Clojure CLI, Git, and JDK 17 or later, the upstream minimum. Initial dependency resolution needs Git/Maven network access. Bun and a TypeScript build are only development concerns; see [development](development.md) for the tested environment.
 
 For a released version:
 
 ```sh
-pi install npm:pi-clojure-mcp@0.1.0
+pi install npm:pi-clojure-mcp@0.2.0
 
 cd /path/to/your/clojure-project
 pi
 ```
 
-To try a release without installing it, run `pi -e npm:pi-clojure-mcp@0.1.0` from the application directory. npm commands require that version to have been published; use the [local checkout instructions](development.md#local-checkout) for unreleased source.
+To try a release without installing it, run `pi -e npm:pi-clojure-mcp@0.2.0` from the application directory. npm commands require that version to have been published; use the [local checkout instructions](development.md#local-checkout) for unreleased source.
 
 The whole package supplies both extension and `repl-driven-development` skill. For a checkout, load its directory rather than just `src/extension.ts`. Keep one installed source at a time: when switching between checkout, Git and npm, remove the previous entry with `pi remove <old-source>` so two copies do not register the same commands/server.
 
@@ -28,6 +28,8 @@ Inside Pi:
 - `/clj` shows package help.
 - `/mcp` shows `pi_clojure` and its five tools once the server connects.
 - `/skill:repl-driven-development` explicitly loads the development guide; Pi also advertises it for automatic selection.
+
+Eval and runtime tool calls have native feedback cards. Expand them for received output and original status JSON; see [REPL feedback](reference.md#repl-feedback). A historical card is a recorded observation, not a fresh check of today's application.
 
 Tools begin with `mcp__pi_clojure__`. Another server named `clojure` is a separate registration and may address a different runtime. Use `/mcp` inside Pi: shell-level `pi mcp list` does not load extension registrations.
 

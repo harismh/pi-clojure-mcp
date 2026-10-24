@@ -3,8 +3,10 @@ import { mkdtemp, mkdir, writeFile, rm, access, readFile } from "node:fs/promise
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "bun:test";
+import { stripVTControlCharacters } from "node:util";
+import type { TUI } from "@earendil-works/pi-tui";
 import { Type } from "typebox";
-import { createAgentSession, createMcpExtension, DefaultResourceLoader, SessionManager, SettingsManager, type AgentSession, type ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { createAgentSession, createMcpExtension, DefaultResourceLoader, initTheme, SessionManager, SettingsManager, ToolExecutionComponent, type AgentSession, type ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { PACKAGE_ROOT, readStatus } from "../src/config.ts";
 import { alive, eventually, externalRepl, stopChild } from "./support.ts";
 
@@ -61,7 +63,7 @@ test("real Pi MCP: readiness, upstream discovery, scoped reload and ownership-sa
     const manager = SessionManager.inMemory(directory);
     ({ session } = await createAgentSession({ cwd: directory, agentDir, resourceLoader: loader,
       settingsManager: settings, sessionManager: manager }));
-    await session.bindExtensions({ onError: error => { errors.push(String(error)); } });
+    await session.bindExtensions({ mode: "json", onError: error => { errors.push(String(error)); } });
     assert.match(session.systemPrompt, /repl-driven-development/);
     assert.ok(!session.systemPrompt.includes(firstParagraph), "actual skill body is on demand, not injected every turn");
     await eventually(() => session!.getActiveToolNames().filter(name => name.startsWith(prefix)).length === 5, 60_000);
@@ -92,7 +94,29 @@ test("real Pi MCP: readiness, upstream discovery, scoped reload and ownership-sa
       session!.refreshContext();
       return result;
     };
+    initTheme("dark", false);
+    const renderReceived = (name: string, args: Record<string, unknown>, received: { content: any[]; details?: unknown; isError?: boolean }) => {
+      const original = JSON.stringify(received);
+      const fullName = prefix + name;
+      const renderers = session!.extensionRunner.resolveToolRenderers(fullName, () => session!.getToolDefinition(fullName));
+      assert.ok(renderers?.renderCall);
+      assert.ok(renderers?.renderResult);
+      const view = new ToolExecutionComponent(fullName, "rendered/" + name, args, { outputPad: 1, showImages: false }, renderers,
+        { requestRender() {} } as TUI, directory);
+      view.markExecutionStarted();
+      view.setArgsComplete();
+      view.updateResult({ ...received, isError: received.isError ?? false });
+      const compact = view.render(120).map(stripVTControlCharacters).join("\n");
+      view.setExpanded(true);
+      const expanded = view.render(120).map(stripVTControlCharacters).join("\n");
+      assert.equal(JSON.stringify(received), original, "rendering never rewrites the model/codemode result");
+      return { compact, expanded };
+    };
     const initialResult = await call("runtime_status");
+    const initialCard = renderReceived("runtime_status", {}, initialResult);
+    assert.match(initialCard.compact, /Snapshot · not ready · none/);
+    assert.match(initialCard.expanded, /"schemaVersion"/);
+    assert.doesNotMatch(text(initialResult), /Snapshot ·/);
     const initial = readStatus(initialResult.content)!;
     assert.ok(initial, JSON.stringify(initialResult));
     assert.equal(initial.ready, false);
@@ -103,12 +127,27 @@ test("real Pi MCP: readiness, upstream discovery, scoped reload and ownership-sa
     assert.equal(managed.ready, true);
     assert.equal(managed.ownership, "managed");
     managedPids.push(Number(managed.pid));
-    const seeded = await call("clojure_eval", { code: "(require 'pi-clojure.integration 'pi-clojure.integration-view) (in-ns 'pi-clojure.integration) (+ 20 22)" });
+    const seedCode = "(require 'pi-clojure.integration 'pi-clojure.integration-view) (in-ns 'pi-clojure.integration) (+ 20 22)";
+    const seeded = await call("clojure_eval", { code: seedCode });
     assert.equal(seeded.isError, false);
     assert.match(text(seeded), /=> 42/);
+    const evalCard = renderReceived("clojure_eval", { code: seedCode }, seeded);
+    assert.match(evalCard.compact, /Clojure eval · default target/);
+    assert.match(evalCard.compact, /=> 42/);
+    assert.match(evalCard.compact, /Request completed/);
+    assert.doesNotMatch(text(seeded), /Received output|Request completed/);
     const checked = readStatus((await call("runtime_status")).content)!;
     assert.equal(checked.namespace, "pi-clojure.integration");
     assert.match(text(await call("clojure_eval", { code: "(and (= 42 *1) (identical? state original-state))" })), /=> true/);
+
+    const failingCode = '(identity :before-error) (throw (ex-info "feedback-fixture" {})) :after-error';
+    const failedEval = await call("clojure_eval", { code: failingCode });
+    assert.equal(failedEval.isError, true);
+    const errorSequence = /=> :before-error[\s\S]*feedback-fixture[\s\S]*=> :after-error/;
+    assert.match(text(failedEval), errorSequence);
+    const errorCard = renderReceived("clojure_eval", { code: failingCode }, failedEval);
+    assert.match(errorCard.compact, /Request failed/);
+    assert.match(errorCard.compact.split("Received output")[1] ?? "", errorSequence);
 
     await writeFile(viewFile, '(ns pi-clojure.integration-view)\n(defn describe [] (assoc @pi-clojure.integration/state :version 2))\n');
     const reloaded = await call("clojure_eval", { code: "(require 'pi-clojure.integration-view :reload) (and (identical? state original-state) (= {:counter 41 :version 2} (pi-clojure.integration-view/describe)))" });
@@ -119,6 +158,7 @@ test("real Pi MCP: readiness, upstream discovery, scoped reload and ownership-sa
     const refusedStop = await call("clojure_repl", { action: "stop" });
     assert.equal(refusedStop.isError, true);
     assert.match(text(refusedStop), /STATE LOSS/);
+    assert.match(renderReceived("clojure_repl", { action: "stop" }, refusedStop).compact, /Request failed[\s\S]*STATE LOSS/);
     assert.ok(alive(Number(managed.pid)));
     external = await externalRepl(directory);
     const refusedAttach = await call("clojure_repl", { action: "attach", port: external.port });
